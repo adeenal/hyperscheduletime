@@ -21,6 +21,7 @@ import $ from "jquery";
 import "bootstrap";
 import randomColor from "randomcolor";
 
+
 import * as Course from "./course";
 import * as SortKey from "./sort-key";
 import * as Schedule from "./schedule";
