@@ -61,7 +61,9 @@ const greyConflictCoursesOptions = ["none", "starred", "all"];
 const filterKeywords: Record<string, string[]> = {
   "dept:": ["dept:", "department:"],
   "college:": ["college", "col:", "school:", "sch:"],
-  "days:": ["days:", "day:"]
+  "days:": ["days:", "day:"],
+  "start:": ["start"],
+  "end:": ["end"]
 };
 
 const filterInequalities = ["<=", ">=", "<", ">", "="];
@@ -535,8 +537,8 @@ function coursePassesTextFilters(
     //code added here
     //code added here
     //code added here
-    (textFilters["startTime:"] && !coursePassesStartFilter(schedule, textFilters["start:"])) ||
-    (textFilters["endTime:"] && !coursePassesEndFilter(schedule, textFilters["end:"]))
+    (textFilters["start:"] && !coursePassesStartFilter(schedule, textFilters["start:"])) ||
+    (textFilters["end:"] && !coursePassesEndFilter(schedule, textFilters["end:"]))
     //end code added
     //end code added
     //end code added
@@ -650,30 +652,30 @@ function parseStartInequality(inputStart: string) {
 }
 
 function generateStartFilter(schedule: Schedule.Schedule) {
-  const startList = schedule.scheduleStartTime;
-  let startTimes = new Set();
+  // const startList = schedule.scheduleStartTime;
+  // let startTimes = new Set();
 
-  for (let startTime of startList) {
-    const str1 = schedule.scheduleStartTime;
-    const arr1 = [...str1];
-    arr1.forEach(startTimes.add, startTimes);
-  }
-  return startTimes;
+  // for (let startTime of startList) {
+  //   const str1 = schedule.scheduleStartTime;
+  //   const arr1 = [...str1];
+  //   arr1.forEach(startTimes.add, startTimes);
+  // }
+  return schedule.scheduleStartTime;
 }
 
-function generateInputStart(input: string) {
-  let startTimes = new Set();
-  const arr1 = [...input];
-  arr1.forEach(startTimes.add, startTimes);
-  return startTimes;
-}
+// function generateInputStart(input: string) {
+//   let startTimes = new Set();
+//   const arr1 = [...input];
+//   arr1.forEach(startTimes.add, startTimes);
+//   return startTimes;
+// }
 
 function coursePassesStartFilter(schedule: Schedule.Schedule, inputStartString: string) {
-  const courseStartTimesSet = generateStartFilter(schedule);
+  // const courseStartTimesSet = generateStartFilter(schedule);
   const rel = parseStartInequality(inputStartString);
-  const inputStart = generateInputStart(
-    inputStartString.substring(rel.length)
-  );
+  // const inputStart = generateInputStart(
+  //   inputStartString.substring(rel.length)
+  // );
 
   const offset = gTimeZoneValues[gTimeZoneSavings] - pacificTimeZoneValues[gPacificTimeSavings]
   const courseStartTime = TimeString.tzAdjusted(schedule.scheduleStartTime, offset)
@@ -784,44 +786,25 @@ function timeInMin(time: string){
 function greaterThan(time1: string, time2: string){
   let timeInMin1 = timeInMin(time1);
   let timeInMin2 = timeInMin(time2); 
-  if (timeInMin1 >= timeInMin2){
-    return true;
-  }
-  else{
-    return false;
-  }
+  return timeInMin1 >= timeInMin2;
 }
 
 function lessThan(time1: string, time2: string){
   let timeInMin1 = timeInMin(time1);
   let timeInMin2 = timeInMin(time2); 
-  if (timeInMin1 <= timeInMin2){
-    return true;
-  }
-  else{
-    return false;
-  }
+  return timeInMin1 <= timeInMin2;
 }
 
 function equalTo(time1: string, time2: string){
   let timeInMin1 = timeInMin(time1);
   let timeInMin2 = timeInMin(time2); 
-  if (timeInMin1 == timeInMin2){
-    return true;
-  }
-  else{
-    return false;
-  }
+  return timeInMin1 == timeInMin2;
 }
 
 function withinTimeRange(time1: string, time2: string){
   let timeInMin1 = timeInMin(time1);
   let timeInMin2 = timeInMin(time2);  
-  if (Math.abs(Number(timeInMin1) - Number(timeInMin2)) <= 30){
-    return true;
-  }else{
-    return false;
-  }
+  return Math.abs(Number(timeInMin1) - Number(timeInMin2)) <= 30;
 }
 
 //
