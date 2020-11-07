@@ -761,7 +761,17 @@ function coursePassesEndFilter(schedule: Schedule.Schedule, inputEndString: stri
       return false;
   }
 }
-
+//
+//
+//
+//
+//
+//          TIME HELPER FUNCTIONS START HERE,,,,,,,
+//
+//
+//
+//
+//
 function timeInMin(time: string){
   let indexCol = time.indexOf(":");
   let hour = time.slice(0, indexCol);
@@ -812,7 +822,38 @@ function withinTimeRange(time1: string, time2: string){
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //                         END OF OUR CODE,,,,,,,,,,,
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
