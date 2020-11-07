@@ -632,10 +632,26 @@ function coursePassesDayFilter(course: Course.CourseV3, inputString: string) {
 //
 //
 //
+
+
+
+
+
 //
 //
 //
 //            START TIME FILTER STARTS HERE
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
