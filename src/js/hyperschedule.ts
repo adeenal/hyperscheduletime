@@ -34,6 +34,7 @@ interface ApiData {
   data: {
     terms: Record<string, Term>;
     courses: Record<string, Course.CourseV3>;
+    schedule: Record<string, Schedule.Schedule>;
   };
   until: number;
 }
@@ -509,6 +510,7 @@ function courseMatchesSearchQuery(course: Course.CourseV3, query: RegExp[]) {
 
 function coursePassesTextFilters(
   course: Course.CourseV3,
+  schedule: Schedule.Schedule,
   textFilters: Record<string, string>
 ) {
   const lowerCourseCode = course.courseCode.toLowerCase();
@@ -518,9 +520,38 @@ function coursePassesTextFilters(
   if (
     (textFilters["dept:"] && !dept.match(textFilters["dept:"])) ||
     (textFilters["college:"] && !col.match(textFilters["college:"])) ||
-    (textFilters["days:"] &&
-      !coursePassesDayFilter(course, textFilters["days:"]))
-  ) {
+    (textFilters["days:"] && !coursePassesDayFilter(course, textFilters["days:"])) ||
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    //code added here
+    (textFilters["startTime:"] && !coursePassesStartFilter(schedule, textFilters["start:"])) ||
+    (textFilters["endTime:"] && !coursePassesEndFilter(schedule, textFilters["end:"]))
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    //end code added
+    ) {
     return false;
   }
 
@@ -590,6 +621,221 @@ function coursePassesDayFilter(course: Course.CourseV3, inputString: string) {
       return false;
   }
 }
+
+//
+//
+//             OUR CODE ,,,,,,,,,,,,,,,
+//
+//
+//
+//
+//
+//
+//
+//            START TIME FILTER STARTS HERE
+//
+//
+//
+//
+//
+//
+//
+//
+
+function parseStartInequality(inputStart: string) {
+  for (const rel of filterInequalities)
+    if (inputStart.startsWith(rel)) return rel;
+  return "";
+}
+
+function generateStartFilter(schedule: Schedule.Schedule) {
+  const startList = schedule.scheduleStartTime;
+  let startTimes = new Set();
+
+  for (let startTime of startList) {
+    const str1 = schedule.scheduleStartTime;
+    const arr1 = [...str1];
+    arr1.forEach(startTimes.add, startTimes);
+  }
+  return startTimes;
+}
+
+function generateInputStart(input: string) {
+  let startTimes = new Set();
+  const arr1 = [...input];
+  arr1.forEach(startTimes.add, startTimes);
+  return startTimes;
+}
+
+function coursePassesStartFilter(schedule: Schedule.Schedule, inputStartString: string) {
+  const courseStartTimesSet = generateStartFilter(schedule);
+  const rel = parseStartInequality(inputStartString);
+  const inputStart = generateInputStart(
+    inputStartString.substring(rel.length)
+  );
+
+  const offset = gTimeZoneValues[gTimeZoneSavings] - pacificTimeZoneValues[gPacificTimeSavings]
+  const courseStartTime = TimeString.tzAdjusted(schedule.scheduleStartTime, offset)
+  const inputStartTime = TimeString.tzAdjusted(inputStartString, offset)
+
+  switch (rel) {
+    case "<=":
+      // course starts before input start time    
+      return lessThan(courseStartTime, inputStartTime);
+    case "":
+      // course starts within 30 minutes of input start time 
+      return withinTimeRange(courseStartTime, inputStartTime);
+    case ">=":
+      // course starts after input start time 
+      return greaterThan(courseStartTime, inputStartTime);
+    case "=":
+      // course starts at input start time 
+      return equalTo(courseStartTime, inputStartTime);
+    default:
+      return false;
+  }
+}
+
+
+//
+//
+//
+//          END FILTER STARTS HERE
+//
+//
+//
+
+
+function parseEndInequality(inputEnd: string) {
+  for (const rel of filterInequalities)
+    if (inputEnd.startsWith(rel)) return rel;
+  return "";
+}
+
+function generateEndFilter(schedule: Schedule.Schedule) {
+  const endList = schedule.scheduleEndTime;
+  let EndTimes = new Set();
+
+  for (let EndTime of endList) {
+    const str1 = schedule.scheduleEndTime;
+    const arr1 = [...str1];
+    arr1.forEach(EndTimes.add, EndTimes);
+  }
+  return EndTimes;
+}
+
+function generateInputEnd(input: string) {
+  let EndTimes = new Set();
+  const arr1 = [...input];
+  arr1.forEach(EndTimes.add, EndTimes);
+  return EndTimes;
+}
+
+function coursePassesEndFilter(schedule: Schedule.Schedule, inputEndString: string) {
+  const courseEndTimesSet = generateEndFilter(schedule);
+  const rel = parseEndInequality(inputEndString);
+  const inputEnd = generateInputEnd(
+    inputEndString.substring(rel.length)
+  );
+
+  const offset = gTimeZoneValues[gTimeZoneSavings] - pacificTimeZoneValues[gPacificTimeSavings]
+  const courseEndTime = TimeString.tzAdjusted(schedule.scheduleEndTime, offset)
+  const inputEndTime = TimeString.tzAdjusted(inputEndString, offset)
+
+  switch (rel) {
+    case "<=":
+      // courseDays is a subset of inputDays      
+      return lessThan(courseEndTime, inputEndTime);
+    case "":
+      return withinTimeRange(courseEndTime, inputEndTime);
+    case ">=":
+      // inputDays is a subset of courseDays
+      return greaterThan(courseEndTime, inputEndTime);
+    case "=":
+      // inputDays match exactly courseDays
+      return equalTo(courseEndTime, inputEndTime);
+    default:
+      return false;
+  }
+}
+
+function timeInMin(time: string){
+  let indexCol = time.indexOf(":");
+  let hour = time.slice(0, indexCol);
+  let min = time.slice(indexCol + 1, -2);
+  let ampm = time.slice(-2);
+  if(ampm == "am"){
+    if(hour == "12"){
+      return min;
+    }else{
+      return Number(hour)*60 + Number(min);
+    }
+  }else{
+    if(hour == "12"){
+      return Number(hour)*60 + Number(min);
+    }
+    else{
+      return (Number(hour)+12)*60 + Number(min);
+    }
+  }
+}
+
+function greaterThan(time1: string, time2: string){
+  let timeInMin1 = timeInMin(time1);
+  let timeInMin2 = timeInMin(time2); 
+  if (timeInMin1 >= timeInMin2){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+function lessThan(time1: string, time2: string){
+  let timeInMin1 = timeInMin(time1);
+  let timeInMin2 = timeInMin(time2); 
+  if (timeInMin1 <= timeInMin2){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+function equalTo(time1: string, time2: string){
+  let timeInMin1 = timeInMin(time1);
+  let timeInMin2 = timeInMin(time2); 
+  if (timeInMin1 == timeInMin2){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+function withinTimeRange(time1: string, time2: string){
+  let timeInMin1 = timeInMin(time1);
+  let timeInMin2 = timeInMin(time2);  
+  if (Math.abs(Number(timeInMin1) - Number(timeInMin2)) <= 30){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+//
+//
+//
+//
+//
+//                         END OF OUR CODE,,,,,,,,,,,
+//
+//
+//
+//
+//
+//
+
 
 function setSubset<T>(a: Set<T>, b: Set<T>) {
   if (a.size > b.size) return false;
@@ -946,9 +1192,10 @@ function updateCourseSearchResults() {
         ? []
         : Object.keys(gApiData.data.courses).filter(key => {
             const course = gApiData!.data.courses[key];
+            const schedule = gApiData!.data.schedule[key];
             return (
               courseMatchesSearchQuery(course, query) &&
-              coursePassesTextFilters(course, filters) &&
+              coursePassesTextFilters(course, schedule, filters) &&
               (gShowClosedCourses || !Course.isClosed(course)) &&
               (!gHideAllConflictingCourses ||
                 !courseConflictWithSchedule(course, false)) &&
